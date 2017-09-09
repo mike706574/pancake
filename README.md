@@ -1,6 +1,7 @@
 # pancake
 
-A project.
+A fixed-width file parsing library.
+
 
 ## Copyright and License
 
