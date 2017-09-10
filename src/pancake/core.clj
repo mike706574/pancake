@@ -20,8 +20,8 @@
                              (and length (not= line-length length)) :length-mismatch
                              (< line-length min-length) :too-short)]
         (or (when error-category
-              {:data-index (inc index) :data-error {:category error-category :data line}})
-            (reduce assoc-field {:data-index (inc index)} fields) :status :ok)))))
+              {:data-index index :data-error {:category error-category :data line}})
+            (reduce assoc-field {:data-index index} fields) :status :ok)))))
 
 (defn ^:private illegal-format-length
   [{:keys [length min-length]}]

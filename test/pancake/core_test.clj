@@ -10,7 +10,7 @@
                          {:id :amount :start 4 :end 6}]}
         format-with-min-length (assoc format :min-length 6)
         parse (core/str-parser format)]
-    (is (= [{:data-index 1 :id "AAA" :amount "015"}]
+    (is (= [{:data-index 0 :id "AAA" :amount "015"}]
            (parse "AAA015")))))
 
 (deftest parser
@@ -20,7 +20,7 @@
                          {:id :amount :start 4 :end 6}]}
         format-with-min-length (assoc format :min-length 6)
         parse (core/parser format)]
-    (is (= [{:data-index 1 :id "AAA" :amount "015"}]
+    (is (= [{:data-index 0 :id "AAA" :amount "015"}]
            (parse (java.io.StringReader. "AAA015"))))))
 
 (deftest no-specified-length
@@ -32,49 +32,49 @@
         parse (partial core/parse-str format)]
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :id "AAA" :amount "015"}]}
+            :data [{:data-index 0 :id "AAA" :amount "015"}]}
            (parse "AAA015")))
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :id "AAA" :amount "015"}]}
+            :data [{:data-index 0 :id "AAA" :amount "015"}]}
            (parse "AAA015Z")))
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :id "BBB" :amount "139"}
-                   {:data-index 2 :id "CCC" :amount "264"}]}
+            :data [{:data-index 0 :id "BBB" :amount "139"}
+                   {:data-index 1 :id "CCC" :amount "264"}]}
            (parse "BBB139\nCCC264\n")) )
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :id "BBB" :amount "139"}
-                   {:data-index 2 :id "CCC" :amount "264"}]}
+            :data [{:data-index 0 :id "BBB" :amount "139"}
+                   {:data-index 1 :id "CCC" :amount "264"}]}
            (parse "BBB139\nCCC264")))
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :id "BBB" :amount "139"}
-                   {:data-index 2 :id "CCC" :amount "264"}]}
+            :data [{:data-index 0 :id "BBB" :amount "139"}
+                   {:data-index 1 :id "CCC" :amount "264"}]}
            (parse "BBB139\nCCC264eklawejla")))))
 
 (deftest specified-length
   (let [format {:id "test-format"
                 :description "Test format."
                 :length 6
-                :fields [{:data-index 1 :id :id :start 1 :end 3}
-                         {:data-index 2 :id :amount :start 4 :end 6}]}
+                :fields [{:data-index 0 :id :id :start 1 :end 3}
+                         {:data-index 1 :id :amount :start 4 :end 6}]}
         format-with-min-length (assoc format :min-length 6)
         parse (partial core/parse-str format)]
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :id "AAA" :amount "015"}]}
+            :data [{:data-index 0 :id "AAA" :amount "015"}]}
            (parse "AAA015")))
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 1 :data-error {:category :length-mismatch :data "BBB139Z"}}]}
+            :data [{:data-index 0 :data-error {:category :length-mismatch :data "BBB139Z"}}]}
            (parse "BBB139Z")))))
 
 (deftest invalid-format-length
