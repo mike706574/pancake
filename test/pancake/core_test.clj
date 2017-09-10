@@ -54,7 +54,7 @@
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 0 :data-error {:category :length-mismatch :data "BBB139Z"}}]}
+            :data [{:data-index 0 :format-error {:category :length-mismatch :data "BBB139Z"}}]}
            (core/validate-and-parse format ["BBB139Z"])))))
 
 (deftest invalid-format-length
@@ -68,40 +68,29 @@
             :format-errors [{:category :invalid-format-length}]}
            (core/validate-and-parse format [])))))
 
-(deftest data-error-is-reserved
-  (let [format {:id "test-format"
-                :description "Test format."
-                :fields [{:id "data-error" :start 1 :end 2}]}
-        format-with-min-length (assoc format :min-length 2)]
-    (is (= {:status :invalid-format
-            :format format-with-min-length
-            :format-errors
-            [{:category :fields-reserved
-              :used-reserved-fields #{:data-error}}]}
-           (core/validate-and-parse format [])))))
+(deftest reserved-field-ids
+  (doseq [reserved-field-id core/reserved-field-ids]
+    (let [format {:id "test-format"
+                  :description "Test format."
+                  :fields [{:id reserved-field-id :start 1 :end 2}]}
+          format-with-min-length (assoc format :min-length 2)]
+      (is (= {:status :invalid-format
+              :format format-with-min-length
+              :format-errors
+              [{:category :fields-reserved
+                :used-reserved-fields #{reserved-field-id}}]}
+             (core/validate-and-parse format []))))))
 
-(deftest data-index-is-reserved
-  (let [format {:id "test-format"
-                :description "Test format."
-                :fields [{:id "data-index" :start 1 :end 2}]}
-        format-with-min-length (assoc format :min-length 2)
-        parse (partial core/parse-str format)]
-    (is (= {:status :invalid-format
-            :format format-with-min-length
-            :format-errors [{:category :fields-reserved
-                             :used-reserved-fields #{:data-index}}]}
-           (core/validate-and-parse format [])))))
-
-(deftest invalid-format-length-and-reserved-field
+(deftest multiple-reserved-field-ids
   (let [format {:id "test-format"
                 :description "Test format."
                 :length 1
-                :fields [{:id "data-error" :start 1 :end 2}]}
+                :fields [{:id "format-error" :start 1 :end 2}]}
         format-with-min-length (assoc format :min-length 2)
         parse (partial core/parse-str format)]
     (is (= {:status :invalid-format
             :format format-with-min-length
             :format-errors [{:category :fields-reserved
-                             :used-reserved-fields #{:data-error}}
+                             :used-reserved-fields #{:format-error}}
                             {:category :invalid-format-length}]}
            (core/validate-and-parse format [])))))

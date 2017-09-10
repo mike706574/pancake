@@ -2,7 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.string :as str]))
 
-(defn ^:private max-field-length [format]
+(defn max-field-length [format]
   (->> format
        :fields
        (map :end)
@@ -20,7 +20,7 @@
                              (and length (not= line-length length)) :length-mismatch
                              (< line-length min-length) :too-short)]
         (or (when error-category
-              {:data-index index :data-error {:category error-category :data line}})
+              {:data-index index :format-error {:category error-category :data line}})
             (reduce assoc-field {:data-index index} fields) :status :ok)))))
 
 (defn ^:private illegal-format-length
@@ -28,10 +28,16 @@
   (when (and length (< length min-length))
     {:category :invalid-format-length}))
 
+(def reserved-field-ids #{:data-index
+                          :format-error
+                          :format-errors
+                          :data-error
+                          :data-errors})
+
 (defn ^:private reserved-field
   [format]
   (let [field-ids (set (map (comp keyword :id) (:fields format)))
-        used-reserved-fields (set/intersection field-ids #{:data-error :data-index})]
+        used-reserved-fields (set/intersection field-ids reserved-field-ids)]
     (when-not (empty? used-reserved-fields)
       {:category :fields-reserved
        :used-reserved-fields used-reserved-fields})))
