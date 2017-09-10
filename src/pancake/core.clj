@@ -1,7 +1,7 @@
 (ns pancake.core
   (:require [clojure.java.io :as io]))
 
-(defn ^:private  max-field-length [format]
+(defn ^:private max-field-length [format]
   (->> format
        :fields
        (map :end)
@@ -45,8 +45,8 @@
 
 (defn ^:private assoc-min-length
   [format]
-  (assoc format :min-length (max-field-length format))
-  )
+  (assoc format :min-length (max-field-length format)))
+
 (defn parse [format x]
   (let [format (assoc-min-length format)
         format-errors (format-errors format)]
