@@ -1,6 +1,6 @@
 (ns pancake.core
-  (:require [clojure.java.io :as io]
-            [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojure.string :as str]))
 
 (defn ^:private max-field-length [format]
   (->> format
@@ -42,35 +42,43 @@
        (map #(% format))
        (filter identity)))
 
-(defn ^:private parse-with-format
-  [format x]
-  (map-indexed (partial parse-line format) (line-seq (io/reader x))))
-
 (defn ^:private assoc-min-length
   [format]
   (assoc format :min-length (max-field-length format)))
 
-(defn parse [format x]
+(defn validate-format [format]
   (let [format (assoc-min-length format)
         format-errors (format-errors format)]
     (if (empty? format-errors)
-      {:status :parsed
-       :format format
-       :data (parse-with-format format x)}
-      {:status :invalid-format
-       :format format
-       :format-errors (vec format-errors)})))
+      {:valid? true :format format}
+      {:valid? false :format format :format-errors (vec format-errors)})))
 
-(defn parse-str [format str]
-  (parse format (java.io.StringReader. str)))
+(defn ^:private validate-format! [format]
+  (let [{:keys [valid? format format-errors] :as response} (validate-format format)]
+    (if valid?
+      format
+      (throw (ex-info "Invalid format." {:format format
+                                         :format-errors format-errors})))))
 
-(defn parser
-  [format]
-  (partial parse-with-format (assoc-min-length format)))
+(defn ^:private parse-with-format
+  [format data]
+  (map-indexed (partial parse-line format) data))
 
-(defn str-parser
-  [format]
-  (fn [str]
-    (parse-with-format
-     (assoc-min-length format)
-     (java.io.StringReader. str))))
+(defn ^:private parser [format]
+  (map-indexed (partial parse-line format)))
+
+(defn parse
+  ([format]
+   (parser (validate-format! format)))
+  ([format data]
+   (parse-with-format (validate-format! format) data)))
+
+(defn parse-str
+  [format data]
+  (parse format (str/split-lines data)))
+
+(defn validate-and-parse [format data]
+  (let [{:keys [valid? format format-errors]} (validate-format format)]
+    (if valid?
+      {:status :parsed :format format :data (parse-with-format format data)}
+      {:status :invalid-format :format format :format-errors format-errors})))
