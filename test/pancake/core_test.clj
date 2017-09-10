@@ -3,6 +3,26 @@
   (:require [clojure.test :refer [are deftest is]]
             [pancake.core :as core]))
 
+(deftest str-parser
+  (let [format {:id "test-format"
+                :description "Test format."
+                :fields [{:id "id" :start 1 :end 3}
+                         {:id "amount" :start 4 :end 6}]}
+        format-with-min-length (assoc format :min-length 6)
+        parse (core/str-parser format)]
+    (is (= [{:id "AAA" :amount "015"}]
+           (parse "AAA015")))))
+
+(deftest parser
+  (let [format {:id "test-format"
+                :description "Test format."
+                :fields [{:id "id" :start 1 :end 3}
+                         {:id "amount" :start 4 :end 6}]}
+        format-with-min-length (assoc format :min-length 6)
+        parse (core/parser format)]
+    (is (= [{:id "AAA" :amount "015"}]
+           (parse (java.io.StringReader. "AAA015"))))))
+
 (deftest no-specified-length
   (let [format {:id "test-format"
                 :description "Test format."

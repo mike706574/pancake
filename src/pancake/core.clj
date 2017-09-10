@@ -39,18 +39,35 @@
        (map #(% format))
        (filter identity)))
 
+(defn ^:private parse-with-format
+  [format x]
+  (map (partial parse-line format) (line-seq (io/reader x))))
+
+(defn ^:private assoc-min-length
+  [format]
+  (assoc format :min-length (max-field-length format))
+  )
 (defn parse [format x]
-  (let [min-length (max-field-length format)
-        format (assoc format :min-length min-length)
+  (let [format (assoc-min-length format)
         format-errors (format-errors format)]
     (if (empty? format-errors)
-      (with-open [reader (io/reader x)]
-        {:status :parsed
-         :format format
-         :data (doall (mapv (partial parse-line format) (line-seq reader)))})
+      {:status :parsed
+       :format format
+       :data (parse-with-format format x)}
       {:status :invalid-format
        :format format
        :format-errors format-errors})))
 
 (defn parse-str [format str]
   (parse format (java.io.StringReader. str)))
+
+(defn parser
+  [format]
+  (partial parse-with-format (assoc-min-length format)))
+
+(defn str-parser
+  [format]
+  (fn [str]
+    (parse-with-format
+     (assoc-min-length format)
+     (java.io.StringReader. str))))
