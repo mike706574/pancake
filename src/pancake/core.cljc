@@ -15,13 +15,15 @@
           (assoc-field [record field]
             (assoc record (:id field) (extract-field field)))]
     (let [{:keys [fields length min-length]} format
-          line-length (count line)]
-      (let [error-category (cond
-                             (and length (not= line-length length)) :length-mismatch
-                             (< line-length min-length) :too-short)]
-        (or (when error-category
-              {:data-index index :format-error {:category error-category :data line}})
-            (reduce assoc-field {:data-index index} fields) :status :ok)))))
+          line-length (count line)
+          response {:data-index index
+                    :data-line line}
+          format-error (cond
+                         (and length (not= line-length length)) :length-mismatch
+                         (< line-length min-length) :too-short)]
+      (if format-error
+        (assoc response :format-error format-error)
+        (reduce assoc-field response fields)))))
 
 (defn ^:private illegal-format-length
   [{:keys [length min-length]}]
@@ -29,10 +31,9 @@
     {:category :invalid-format-length}))
 
 (def reserved-field-ids #{:data-index
-                          :format-error
-                          :format-errors
-                          :data-error
-                          :data-errors})
+                          :data-line
+                          :data-errors
+                          :format-error})
 
 (defn ^:private reserved-field
   [format]
