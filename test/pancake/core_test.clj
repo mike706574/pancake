@@ -28,7 +28,9 @@
                 :description "Test format."
                 :fields [{:id :id :start 1 :end 3}
                          {:id :amount :start 4 :end 6}]}]
-    (is (= [{:data-index 0 :data-line "AAA" :format-error :too-short}]
+    (is (= [{:data-index 0
+             :data-line "AAA"
+             :data-errors [{:in :data-line :pred "long-enough?"}]}]
            (core/parse format ["AAA"])))
 
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
@@ -59,7 +61,9 @@
 
     (is (= {:status :parsed
             :format format-with-min-length
-            :data [{:data-index 0 :data-line "BBB139Z" :format-error :length-mismatch}]}
+            :data [{:data-index 0
+                    :data-line "BBB139Z"
+                    :data-errors [{:in :data-line :pred "length-matches?"}]}]}
            (core/validate-and-parse format ["BBB139Z"])))))
 
 (deftest invalid-format-length
@@ -90,13 +94,13 @@
   (let [format {:id "test-format"
                 :description "Test format."
                 :length 1
-                :fields [{:id "format-error" :start 1 :end 2}
+                :fields [{:id "data-line" :start 1 :end 2}
                          {:id "data-errors" :start 1 :end 2}]}
         format-with-min-length (assoc format :min-length 2)
         parse (partial core/parse-str format)]
     (is (= {:status :invalid-format
             :format format-with-min-length
             :format-errors [{:category :fields-reserved
-                             :used-reserved-fields #{:data-errors :format-error}}
+                             :used-reserved-fields #{:data-errors :data-line}}
                             {:category :invalid-format-length}]}
            (core/validate-and-parse format [])))))

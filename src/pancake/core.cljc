@@ -19,10 +19,10 @@
           response {:data-index index
                     :data-line line}
           format-error (cond
-                         (and length (not= line-length length)) :length-mismatch
-                         (< line-length min-length) :too-short)]
+                         (and length (not= line-length length)) "length-matches?"
+                         (< line-length min-length) "long-enough?")]
       (if format-error
-        (assoc response :format-error format-error)
+        (assoc response :data-errors [{:pred format-error :in :data-line}])
         (reduce assoc-field response fields)))))
 
 (defn ^:private illegal-format-length
@@ -32,8 +32,7 @@
 
 (def reserved-field-ids #{:data-index
                           :data-line
-                          :data-errors
-                          :format-error})
+                          :data-errors})
 
 (defn ^:private reserved-field
   [format]
