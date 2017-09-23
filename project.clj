@@ -1,4 +1,4 @@
-(defproject fun.mike/pancake "0.0.11"
+(defproject fun.mike/pancake "0.0.12-SNAPSHOT"
   :description "Fixed-width and delimited data parsing library."
   :url "https://github.com/mike706574/pancake"
   :license {:name "Eclipse Public License"
