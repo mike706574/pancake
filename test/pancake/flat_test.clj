@@ -58,8 +58,8 @@
                 :description "Test format."
                 :type "flat"
                 :length 6
-                :fields [{:data-index 0 :id :id :start 1 :end 3}
-                         {:data-index 1 :id :amount :start 4 :end 6}]}]
+                :fields [{:id :id :start 1 :end 3}
+                         {:id :amount :start 4 :end 6}]}]
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
            (flat/parse format ["AAA015"])))
 

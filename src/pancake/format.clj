@@ -46,9 +46,16 @@
 (defn delimited? [format] (= (:type format) "delimited"))
 
 (s/def ::index integer?)
+(defn one-char? [s] (= (count s) 1))
+(s/def ::delimiter (s/or :char char?
+                         :string (s/and string? one-char?)))
 (s/def ::cell (s/keys :req-un [::id ::index]))
 (s/def ::cells (s/coll-of ::cell))
-(s/def ::delimited-format (s/and (s/keys :req-un [::id ::description ::type ::cells]
+(s/def ::delimited-format (s/and (s/keys :req-un [::id
+                                                  ::description
+                                                  ::type
+                                                  ::delimiter
+                                                  ::cells]
                                          :opt-un [::length])
                                  delimited?
                                  valid-delimited-length?))

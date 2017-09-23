@@ -4,13 +4,15 @@
   (:import [java.io PushbackReader StringReader]))
 
 (def ^{:private true} end -1)
+(def ^{:private true} quote 34)
+(def ^{:private true} quote-char \")
 
-(defn ^:private read-quoted-cell [^PushbackReader reader ^StringBuilder sb sep quote]
+(defn ^:private read-quoted-cell [^PushbackReader reader ^StringBuilder sb sep]
   (loop [ch (.read reader)]
     (condp == ch
       quote (let [next-ch (.read reader)]
               (condp == next-ch
-                quote (do (.append sb (char quote))
+                quote (do (.append sb quote-char)
                           (recur (.read reader)))
                 sep :sep
                 end :end
@@ -19,7 +21,7 @@
       (do (.append sb (char ch))
           (recur (.read reader))))))
 
-(defn ^:private read-cell [^PushbackReader reader ^StringBuilder sb sep quote]
+(defn ^:private read-cell [^PushbackReader reader ^StringBuilder sb sep]
   (let [first-ch (.read reader)]
     (if (== first-ch quote)
       (read-quoted-cell reader sb sep quote)
@@ -30,10 +32,10 @@
           (do (.append sb (char ch))
               (recur (.read reader))))))))
 
-(defn ^:private read-record [reader sep quote]
+(defn ^:private read-record [reader sep]
   (loop [data (transient [])]
     (let [cell (StringBuilder.)
-          sentinel (read-cell reader cell sep quote)
+          sentinel (read-cell reader cell sep)
           data (conj! data (str cell))]
       (if (= sentinel :sep)
         (recur data)
@@ -45,26 +47,27 @@
     (char? x) (int x)
     (string? x) (int (first x))))
 
+
 (defn ^:private data-error [record data-error]
   (let [data-errors (:data-errors record)]
     (assoc record :data-errors (vec (conj data-errors data-error)))))
 
 (defn ^:private parse-line [format index line]
-  (letfn [(assoc-field [data record field]
-            (let [{:keys [id index]} field]
+  (letfn [(assoc-cell [data record cell]
+            (let [{:keys [id index]} cell]
               (if-let [val (get data index)]
                 (assoc record id val)
                 (-> record
                     (assoc id nil)
-                    (data-error [:pred "contains?" :in id])))))]
-    (let [{:keys [fields length separator quote]} format
+                    (data-error {:pred "contains?" :in id})))))]
+    (let [{:keys [cells length delimiter]} format
           reader (PushbackReader. (StringReader. line))
-          [valid? data] (read-record reader (char-int separator) (char-int quote))
+          [valid? data] (read-record reader (char-int delimiter))
           record {:data-index index :data-line line}]
       (if valid?
         (if (and length (not= (count data) length))
           (data-error record {:pred "length-matches?" :in :data-line :parsed data})
-          (reduce (partial assoc-field data) record fields))
+          (reduce (partial assoc-cell data) record cells))
         (data-error record {:pred "valid-cell?" :in :data-line :up-to data})))))
 
 (defn ^:private parse-with-format
