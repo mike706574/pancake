@@ -1,4 +1,4 @@
-(defproject org.clojars.mike706574/pancake "0.0.11-SNAPSHOT"
+(defproject fun.mike/pancake "0.0.11-SNAPSHOT"
   :description "Fixed-width and delimited data parsing library."
   :url "https://github.com/mike706574/pancake"
   :license {:name "Eclipse Public License"
