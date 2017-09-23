@@ -1,9 +1,11 @@
 (defproject org.clojars.mike706574/pancake "0.0.11-SNAPSHOT"
-  :description "Fixed-width data parsing library."
+  :description "Fixed-width and delimited data parsing library."
   :url "https://github.com/mike706574/pancake"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :min-lein-version "2.0.0"
+  :dependencies [[org.clojure/spec.alpha "0.1.123"]
+                 [org.clojure/core.match "0.3.0-alpha5"]]
   :profiles {:dev {:source-paths ["dev"]
                    :target-path "target/dev"
                    :dependencies [[org.clojure/clojure "1.9.0-alpha20"]
