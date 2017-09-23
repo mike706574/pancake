@@ -1,6 +1,6 @@
 # pancake
 
-A fixed-width file parsing library.
+A fixed-width and delimited file parsing library.
 
 
 ## Copyright and License
