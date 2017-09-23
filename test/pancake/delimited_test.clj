@@ -71,3 +71,13 @@
                              :pred "length-matches?"
                              :parsed ["BBB" "139" "Z"]}]}]
            (delimited/parse format ["BBB|139|Z"])))))
+
+(deftest csv
+  (let [format {:id "test-format"
+                :type "delimited"
+                :delimiter ","
+                :description "Test format."
+                :cells [{:id :id :index 0}
+                        {:id :amount :index 1}]}]
+    (is (= [{:data-index 0 :data-line "AAA,015" :id "AAA" :amount "015"}]
+           (delimited/parse format ["AAA,015"])))))
