@@ -1,11 +1,11 @@
-(ns pancake.flat
+(ns pancake.fixed-width
   (:require [clojure.string :as str]
             [pancake.format :as format]))
 
 (defn ^:private data-error [record data-error]
   (update record :data-errors (comp vec #(conj % data-error))))
 
-(defn ^:private parse-line [format index line]
+(defn parse-line [format index line]
   (letfn [(assoc-field [record field]
             (let [{:keys [id start end]} field
                   length (count line)]
@@ -29,13 +29,13 @@
 
 (defn parse
   ([format]
-   (format/validate-flat! format)
+   (format/validate-fixed-width! format)
    (parser format))
   ([format data]
-   (format/validate-flat! format)
+   (format/validate-fixed-width! format)
    (parse-with-format format data)))
 
 (defn parse-str
   [format data]
-  (format/validate-flat! format)
+  (format/validate-fixed-width! format)
   (parse format (str/split-lines data)))

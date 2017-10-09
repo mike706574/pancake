@@ -9,29 +9,29 @@
                    unreserved?))
 (s/def ::description string?)
 (s/def ::length integer?)
-(s/def ::type #{"flat" "delimited"})
+(s/def ::type #{"fixed-width" "delimited"})
 
-;; flat
-(defn flat-min-length [format]
+;; fixed-width
+(defn fixed-width-min-length [format]
   (->> format :fields (map :end) (apply max)))
 
-(defn valid-flat-length? [format]
+(defn valid-fixed-width-length? [format]
   (let [length (:length format)
-        min-length (flat-min-length format)]
+        min-length (fixed-width-min-length format)]
     (or (not length)
         (>= length min-length))))
 
-(defn flat? [format] (= (:type format) "flat"))
+(defn fixed-width? [format] (= (:type format) "fixed-width"))
 
 (s/def ::start integer?)
 (s/def ::end integer?)
 (s/def ::field (s/keys :req-un [::id ::start ::end]))
 (s/def ::fields (s/coll-of ::field))
 
-(s/def ::flat-format (s/and (s/keys :req-un [::id ::description ::type ::fields]
+(s/def ::fixed-width-format (s/and (s/keys :req-un [::id ::description ::type ::fields]
                                     :opt-un [::length])
-                            flat?
-                            valid-flat-length?))
+                            fixed-width?
+                            valid-fixed-width-length?))
 
 ;; delimited
 (defn delimited-min-length [format]
@@ -59,14 +59,14 @@
                                          :opt-un [::length])
                                  delimited?
                                  valid-delimited-length?))
-(s/def ::format (s/or :flat ::flat
+(s/def ::format (s/or :fixed-width ::fixed-width
                       :delimited ::delimited))
 
-(defn validate-flat [format] (s/explain-data ::flat-format format))
+(defn validate-fixed-width [format] (s/explain-data ::fixed-width-format format))
 
-(defn validate-flat! [format]
-  (when-let [data (validate-flat format)]
-    (throw (ex-info "Invalid flat format." data))))
+(defn validate-fixed-width! [format]
+  (when-let [data (validate-fixed-width format)]
+    (throw (ex-info "Invalid fixed-width format." data))))
 
 (defn validate-delimited [format] (s/explain-data ::delimited-format format))
 

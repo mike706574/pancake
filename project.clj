@@ -1,5 +1,5 @@
 (defproject fun.mike/pancake "0.0.12-SNAPSHOT"
-  :description "Fixed-width and delimited data parsing library."
+  :description "Flat file data parsing library."
   :url "https://github.com/mike706574/pancake"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
