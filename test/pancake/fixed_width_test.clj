@@ -15,7 +15,7 @@
     (is (= [{:data-index 0 :data-line line  :id "AAA" :amount "015"}]
            (into [] (fixed-width/parse format) data)))))
 
-(deftest parse-str
+(deftest parsing-string
   (let [format {:id "test-format"
                 :type "fixed-width"
                 :description "Test format."
@@ -24,8 +24,6 @@
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
            (fixed-width/parse-str format "AAA015")))))
 
-(= {:in :amount, :pred "contains?"}
-   {:pred "contains?", :in :amount})
 (deftest no-specified-length
   (let [format {:id "test-format"
                 :type "fixed-width"
@@ -36,7 +34,7 @@
              :data-line "AAA"
              :id "AAA"
              :amount nil
-             :data-errors [{:in :amount :pred "contains?"}]}]
+             :data-errors [{:key :amount :pred "contains?"}]}]
            (fixed-width/parse format ["AAA"])))
 
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
@@ -65,5 +63,5 @@
 
     (is (=  [{:data-index 0
               :data-line "BBB139Z"
-              :data-errors [{:in :data-line :pred "length-matches?"}]}]
+              :data-errors [{:key :data-line :pred "length-matches?"}]}]
            (fixed-width/parse format ["BBB139Z"])))))

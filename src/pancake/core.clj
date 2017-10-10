@@ -13,9 +13,9 @@
 
 (defn parse
   ([format]
-   ((parse-fn) format))
+   ((parse-fn format) format))
   ([format data]
-   ((parse-fn) format data)))
+   ((parse-fn format) format data)))
 
 (defn ^:private parse-str-fn [format]
   (case (:type format)

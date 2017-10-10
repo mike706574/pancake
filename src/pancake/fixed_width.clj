@@ -11,13 +11,13 @@
                   length (count line)]
               (if (> end length)
                 (-> (assoc record id nil)
-                    (data-error {:pred "contains?" :in id}))
+                    (data-error {:pred "contains?" :key id}))
                 (assoc record id (subs line (dec start) end)))))]
     (let [{:keys [fields length]} format
           line-length (count line)
           record {:data-index index :data-line line}]
       (if (and length (not= line-length length))
-        (data-error record {:pred "length-matches?" :in :data-line})
+        (data-error record {:pred "length-matches?" :key :data-line})
         (reduce assoc-field record fields)))))
 
 (defn ^:private parse-with-format

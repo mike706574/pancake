@@ -37,7 +37,7 @@
              :data-line "AAA"
              :id "AAA"
              :amount nil
-             :data-errors [{:in :amount :pred "contains?"}]}]
+             :data-errors [{:key :amount :pred "contains?"}]}]
            (delimited/parse format ["AAA"])))
 
     (is (= [{:data-index 0 :data-line "AAA|015" :id "AAA" :amount "015"}]
@@ -67,7 +67,7 @@
 
     (is (=  [{:data-index 0
               :data-line "BBB|139|Z"
-              :data-errors [{:in :data-line
+              :data-errors [{:key :data-line
                              :pred "length-matches?"
                              :parsed ["BBB" "139" "Z"]}]}]
            (delimited/parse format ["BBB|139|Z"])))))
