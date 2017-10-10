@@ -19,7 +19,7 @@
 (deftest parse-str
   (let [format {:id "test-format"
                 :type "delimited"
-                :delimiter\|
+                :delimiter \|
                 :description "Test format."
                 :cells [{:id :id :index 0}
                         {:id :amount :index 1}]}]
