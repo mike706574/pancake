@@ -2,7 +2,13 @@
   (:refer-clojure :exclude [format])
   (:require [clojure.test :refer [are deftest is]]
             [clojure.string :as str]
-            [pancake.format :as format]))
+            [pancake.format :as format]
+
+            [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
+            [clojure.spec.test.alpha :as stest]))
+
+(stest/instrument)
 
 (def format-with-no-value-specs
   {:id "test-format"

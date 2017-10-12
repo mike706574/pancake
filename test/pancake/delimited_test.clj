@@ -2,7 +2,13 @@
   (:refer-clojure :exclude [format])
   (:require [clojure.test :refer [are deftest is]]
             [clojure.string :as str]
-            [pancake.delimited :as delimited]))
+            [pancake.core :as pancake]
+
+            [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
+            [clojure.spec.test.alpha :as stest]))
+
+(stest/instrument)
 
 (deftest parse-xf
   (let [format {:id "test-format"
@@ -14,7 +20,7 @@
         data ["AAA|015"]
         [line] data]
     (is (= [{:data-index 0 :data-line line  :id "AAA" :amount "015"}]
-           (into [] (delimited/parse format) data)))))
+           (into [] (pancake/parse format) data)))))
 
 (deftest parse-str
   (let [format {:id "test-format"
@@ -24,7 +30,7 @@
                 :cells [{:id :id :index 0}
                         {:id :amount :index 1}]}]
     (is (= [{:data-index 0 :data-line "AAA|015" :id "AAA" :amount "015"}]
-           (delimited/parse-str format "AAA|015")))))
+           (pancake/parse-str format "AAA|015")))))
 
 (deftest no-specified-length
   (let [format {:id "test-format"
@@ -38,21 +44,21 @@
              :id "AAA"
              :amount nil
              :data-errors [{:key :amount :pred "contains?"}]}]
-           (delimited/parse format ["AAA"])))
+           (pancake/parse format ["AAA"])))
 
     (is (= [{:data-index 0 :data-line "AAA|015" :id "AAA" :amount "015"}]
-           (delimited/parse format ["AAA|015"])))
+           (pancake/parse format ["AAA|015"])))
 
     (is (= [{:data-index 0 :data-line "AAA|015|Z" :id "AAA" :amount "015"}]
-           (delimited/parse format ["AAA|015|Z"])))
+           (pancake/parse format ["AAA|015|Z"])))
 
     (is (= [{:data-index 0 :data-line "BBB|139" :id "BBB" :amount "139"}
             {:data-index 1 :data-line "CCC|264" :id "CCC" :amount "264"}]
-           (delimited/parse format ["BBB|139" "CCC|264"])))
+           (pancake/parse format ["BBB|139" "CCC|264"])))
 
     (is (= [{:data-index 0 :data-line "BBB|139"  :id "BBB" :amount "139"}
             {:data-index 1 :data-line "CCC|264|eklawejla" :id "CCC" :amount "264"}]
-           (delimited/parse format ["BBB|139" "CCC|264|eklawejla"])))))
+           (pancake/parse format ["BBB|139" "CCC|264|eklawejla"])))))
 
 (deftest specified-length
   (let [format {:id "test-format"
@@ -63,14 +69,14 @@
                 :cells [{:id :id :index 0}
                          {:id :amount :index 1}]}]
     (is (= [{:data-index 0 :data-line "AAA|015" :id "AAA" :amount "015"}]
-           (delimited/parse format ["AAA|015"])))
+           (pancake/parse format ["AAA|015"])))
 
     (is (=  [{:data-index 0
               :data-line "BBB|139|Z"
               :data-errors [{:key :data-line
                              :pred "length-matches?"
                              :parsed ["BBB" "139" "Z"]}]}]
-           (delimited/parse format ["BBB|139|Z"])))))
+           (pancake/parse format ["BBB|139|Z"])))))
 
 (deftest csv
   (let [format {:id "test-format"
@@ -80,4 +86,4 @@
                 :cells [{:id :id :index 0}
                         {:id :amount :index 1}]}]
     (is (= [{:data-index 0 :data-line "AAA,015" :id "AAA" :amount "015"}]
-           (delimited/parse format ["AAA,015"])))))
+           (pancake/parse format ["AAA,015"])))))

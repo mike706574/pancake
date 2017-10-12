@@ -29,13 +29,10 @@
 
 (defn parse
   ([format]
-   (format/validate-fixed-width! format)
    (parser format))
   ([format data]
-   (format/validate-fixed-width! format)
    (parse-with-format format data)))
 
 (defn parse-str
   [format data]
-  (format/validate-fixed-width! format)
   (parse format (str/split-lines data)))

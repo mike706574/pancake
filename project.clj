@@ -8,5 +8,6 @@
   :profiles {:dev {:source-paths ["dev"]
                    :target-path "target/dev"
                    :dependencies [[org.clojure/clojure "1.9.0-beta2"]
-                                  [org.clojure/tools.namespace "0.2.11"]]}}
+                                  [org.clojure/tools.namespace "0.2.11"]
+                                  [org.clojure/test.check "0.10.0-alpha2"]]}}
   :repl-options {:init-ns user})

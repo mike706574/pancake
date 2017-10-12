@@ -1,6 +1,5 @@
 (ns pancake.delimited
-  (:require [clojure.string :as str]
-            [pancake.format :as format])
+  (:require [clojure.string :as str])
   (:import [java.io PushbackReader StringReader]))
 
 (def ^{:private true} end -1)
@@ -79,13 +78,10 @@
 
 (defn parse
   ([format]
-   (format/validate-delimited! format)
    (parser format))
   ([format data]
-   (format/validate-delimited! format)
    (parse-with-format format data)))
 
 (defn parse-str
   [format data]
-  (format/validate-delimited! format)
   (parse format (str/split-lines data)))

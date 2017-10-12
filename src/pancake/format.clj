@@ -1,19 +1,14 @@
 (ns pancake.format
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]))
 
+(def reserved-ids #{:data-index :data-line :data-errors
+                    "data-index" "data-line" "data-errors"})
+;; predicates
 (defn unreserved? [id]
-  (not (#{:data-index :data-line :data-errors} id)))
+  (not (contains? reserved-ids id)))
 
-(s/def ::id (s/and (s/or :string string?
-                         :keyword keyword?)
-                   unreserved?))
-(s/def ::description string?)
-(s/def ::length integer?)
-(s/def ::type #{"fixed-width" "delimited"})
-
-(s/def ::spec qualified-keyword?)
-
-;; fixed-width
+;; fixed-width predicates
 (defn fixed-width-min-length [format]
   (->> format :fields (map :end) (apply max)))
 
@@ -25,21 +20,44 @@
 
 (defn fixed-width? [format] (= (:type format) "fixed-width"))
 
-(s/def ::start integer?)
-(s/def ::end integer?)
-(s/def ::field (s/keys :req-un [::id ::start ::end]
-                       :opt-un [::spec]))
-(s/def ::fields (s/coll-of ::field))
+(defn end-after-start? [field]
+  (> (:end field) (:start field)))
 
-(s/def ::fixed-width-format (s/and (s/keys :req-un [::id
-                                                    ::description
-                                                    ::type
-                                                    ::fields]
-                                    :opt-un [::length ::spec])
-                            fixed-width?
-                            valid-fixed-width-length?))
+;; specs
+(s/def ::id (s/with-gen (s/and string? (complement str/blank?))
+              #(s/gen #{"test"})))
+(s/def ::description string?)
+(s/def ::length integer?)
+(s/def ::type #{"fixed-width" "delimited"})
+(s/def ::spec qualified-keyword?)
 
-;; delimited
+(s/def ::keyword-or-populated-string?
+  (s/or :keyword keyword?
+        :string (s/and string? (complement str/blank?))))
+
+;; fixed-width specs
+(s/def :pancake.fixed-width/id ::keyword-or-populated-string?)
+
+(s/def :pancake.fixed-width/start nat-int?)
+(s/def :pancake.fixed-width/end pos-int?)
+(s/def :pancake.fixed-width/field (s/and (s/keys :req-un [:pancake.fixed-width/id
+                                                          :pancake.fixed-width/start
+                                                          :pancake.fixed-width/end]
+                                                 :opt-un [::spec])
+                      end-after-start?))
+(s/def :pancake.fixed-width/fields (s/+ :pancake.fixed-width/field))
+
+(s/def :pancake.fixed-width/format (s/and (s/keys :req-un [::id
+                                                           ::description
+                                                           ::type
+                                                           :pancake.fixed-width/fields]
+                                                  :opt-un [::length ::spec])
+                                          fixed-width?
+                                          valid-fixed-width-length?))
+
+;; delimited predciates
+(defn one-char? [s] (= (count s) 1))
+
 (defn delimited-min-length [format]
   (->> format :cells (map :index) (apply max) (inc)))
 
@@ -51,35 +69,46 @@
 
 (defn delimited? [format] (= (:type format) "delimited"))
 
-(s/def ::index integer?)
-(defn one-char? [s] (= (count s) 1))
-(s/def ::delimiter (s/or :char char?
-                         :string (s/and string? one-char?)))
-(s/def ::cell (s/keys :req-un [::id ::index]
-                      :opt-un [::spec]))
-(s/def ::cells (s/coll-of ::cell))
-(s/def ::delimited-format (s/and (s/keys :req-un [::id
-                                                  ::description
-                                                  ::type
-                                                  ::delimiter
-                                                  ::cells]
-                                         :opt-un [::length ::spec])
-                                 delimited?
-                                 valid-delimited-length?))
-(s/def ::format (s/or :fixed-width ::fixed-width
-                      :delimited ::delimited))
+;; delimited specs
+(s/def :pancake.delimited/id ::keyword-or-populated-string?)
+(s/def :pancake.delimited/index (s/int-in 0 1000))
 
-(defn validate-fixed-width [format] (s/explain-data ::fixed-width-format format))
+(s/def :pancake.delimited/delimiter (s/or :char char?
+                                          :string (s/and string? one-char?)))
+(s/def :pancake.delimited/cell (s/keys :req-un [:pancake.delimited/id
+                                                :pancake.delimited/index]
+                                       :opt-un [::spec]))
+(s/def :pancake.delimited/cells (s/+ :pancake.delimited/cell))
+(s/def :pancake.delimited/format (s/and (s/keys :req-un [::id
+                                                         ::description
+                                                         ::type
+                                                         :pancake.delimited/delimiter
+                                                         :pancake.delimited/cells]
+                                                :opt-un [::length ::spec])
+                                        delimited?
+                                        valid-delimited-length?))
+
+;; format spec
+(s/def :pancake/format (s/or :fixed-width :pancake.fixed-width/format
+                             :delimited :pancake.delimited/format))
+
+;; functions
+(defn validate-fixed-width [format] (s/explain-data :pancake.fixed-width/format format))
 
 (defn validate-fixed-width! [format]
   (when-let [data (validate-fixed-width format)]
     (throw (ex-info "Invalid fixed-width format." data))))
 
-(defn validate-delimited [format] (s/explain-data ::delimited-format format))
+(defn validate-delimited [format] (s/explain-data :pancake.delimited/format format))
 
 (defn validate-delimited! [format]
   (when-let [data (validate-delimited format)]
     (throw (ex-info "Invalid delimited format." data))))
+
+(defn validate [format] (s/explain-data :pancake/format format))
+(defn validate! [format]
+  (when-let [data (validate format)]
+    (throw (ex-info "Invalid format." data))))
 
 (defn value-specs
   [format]
@@ -90,3 +119,7 @@
        (filter :spec)
        (map #(vector (:id %) (:spec %)))
        (into {})))
+
+(s/fdef value-specs
+  :args (s/cat :format :pancake/format)
+  :ret (s/map-of ::id ::spec))
