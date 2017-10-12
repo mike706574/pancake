@@ -11,6 +11,8 @@
 (s/def ::length integer?)
 (s/def ::type #{"fixed-width" "delimited"})
 
+(s/def ::spec qualified-keyword?)
+
 ;; fixed-width
 (defn fixed-width-min-length [format]
   (->> format :fields (map :end) (apply max)))
@@ -25,11 +27,15 @@
 
 (s/def ::start integer?)
 (s/def ::end integer?)
-(s/def ::field (s/keys :req-un [::id ::start ::end]))
+(s/def ::field (s/keys :req-un [::id ::start ::end]
+                       :opt-un [::spec]))
 (s/def ::fields (s/coll-of ::field))
 
-(s/def ::fixed-width-format (s/and (s/keys :req-un [::id ::description ::type ::fields]
-                                    :opt-un [::length])
+(s/def ::fixed-width-format (s/and (s/keys :req-un [::id
+                                                    ::description
+                                                    ::type
+                                                    ::fields]
+                                    :opt-un [::length ::spec])
                             fixed-width?
                             valid-fixed-width-length?))
 
@@ -49,14 +55,15 @@
 (defn one-char? [s] (= (count s) 1))
 (s/def ::delimiter (s/or :char char?
                          :string (s/and string? one-char?)))
-(s/def ::cell (s/keys :req-un [::id ::index]))
+(s/def ::cell (s/keys :req-un [::id ::index]
+                      :opt-un [::spec]))
 (s/def ::cells (s/coll-of ::cell))
 (s/def ::delimited-format (s/and (s/keys :req-un [::id
                                                   ::description
                                                   ::type
                                                   ::delimiter
                                                   ::cells]
-                                         :opt-un [::length])
+                                         :opt-un [::length ::spec])
                                  delimited?
                                  valid-delimited-length?))
 (s/def ::format (s/or :fixed-width ::fixed-width
