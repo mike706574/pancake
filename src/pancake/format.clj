@@ -80,3 +80,13 @@
 (defn validate-delimited! [format]
   (when-let [data (validate-delimited format)]
     (throw (ex-info "Invalid delimited format." data))))
+
+(defn value-specs
+  [format]
+  (->> (get format (case (:type format)
+                     "delimited" :cells
+                     "fixed-width" :fields
+                     :else (throw (ex-info (str "Invalid format type: " (:type format) ".") format))))
+       (filter :spec)
+       (map #(vector (:id %) (:spec %)))
+       (into {})))
