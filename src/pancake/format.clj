@@ -29,7 +29,8 @@
 (s/def ::description string?)
 (s/def ::length integer?)
 (s/def ::type #{"fixed-width" "delimited"})
-(s/def ::spec qualified-keyword?)
+(s/def ::generic-spec qualified-keyword?)
+(s/def ::spec ::generic-spec)
 
 (s/def ::keyword-or-populated-string?
   (s/or :keyword keyword?
@@ -40,12 +41,14 @@
 
 (s/def :pancake.fixed-width/start nat-int?)
 (s/def :pancake.fixed-width/end pos-int?)
+(s/def :pancake.fixed-width/spec ::generic-spec)
 (s/def :pancake.fixed-width/field (s/and (s/keys :req-un [:pancake.fixed-width/id
                                                           :pancake.fixed-width/start
                                                           :pancake.fixed-width/end]
-                                                 :opt-un [::spec])
+                                                 :opt-un [:pancake.fixed-width/spec])
                       end-after-start?))
 (s/def :pancake.fixed-width/fields (s/+ :pancake.fixed-width/field))
+
 
 (s/def :pancake.fixed-width/format (s/and (s/keys :req-un [::id
                                                            ::description
@@ -72,12 +75,13 @@
 ;; delimited specs
 (s/def :pancake.delimited/id ::keyword-or-populated-string?)
 (s/def :pancake.delimited/index (s/int-in 0 1000))
+(s/def :pancake.delimited/spec ::generic-spec)
 
 (s/def :pancake.delimited/delimiter (s/or :char char?
                                           :string (s/and string? one-char?)))
 (s/def :pancake.delimited/cell (s/keys :req-un [:pancake.delimited/id
                                                 :pancake.delimited/index]
-                                       :opt-un [::spec]))
+                                       :opt-un [:pancake.delimited/spec]))
 (s/def :pancake.delimited/cells (s/+ :pancake.delimited/cell))
 (s/def :pancake.delimited/format (s/and (s/keys :req-un [::id
                                                          ::description
@@ -122,4 +126,4 @@
 
 (s/fdef value-specs
   :args (s/cat :format :pancake/format)
-  :ret (s/map-of ::id ::spec))
+  :ret (s/map-of ::id ::generic-spec))
