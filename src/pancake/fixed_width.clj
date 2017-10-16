@@ -17,7 +17,9 @@
           line-length (count line)
           record {:data-index index :data-line line}]
       (if (and length (not= line-length length))
-        (data-error record {:pred `length-matches? :in [:data-line]})
+        (data-error record {:pred `(length-matches? ~length)
+                            :in [:data-line]
+                            :val line})
         (reduce assoc-field record fields)))))
 
 (defn ^:private parse-with-format

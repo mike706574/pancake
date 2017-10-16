@@ -69,5 +69,7 @@
 
     (is (=  [{:data-index 0
               :data-line "BBB139Z"
-              :data-errors [{:in [:data-line] :pred 'pancake.fixed-width/length-matches?}]}]
+              :data-errors [{:in [:data-line]
+                             :pred '(pancake.fixed-width/length-matches? 6)
+                             :val "BBB139Z"}]}]
             (pancake/parse format ["BBB139Z"])))))

@@ -73,8 +73,8 @@
 
     (is (=  [{:data-index 0
               :data-line "BBB|139|Z"
-              :data-errors [{:in [:data-line]
-                             :pred 'pancake.delimited/length-matches?
+              :data-errors [{:in [:data-cell]
+                             :pred `(pancake.delimited/length-matches? 2)
                              :val ["BBB" "139" "Z"]}]}]
            (pancake/parse format ["BBB|139|Z"])))))
 
