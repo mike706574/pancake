@@ -40,7 +40,7 @@
              :data-line "AAA"
              :id "AAA"
              :amount nil
-             :data-errors [{:key :amount :pred "contains?"}]}]
+             :data-errors [{:in [:amount] :pred `contains?}]}]
            (pancake/parse format ["AAA"])))
 
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
@@ -69,5 +69,5 @@
 
     (is (=  [{:data-index 0
               :data-line "BBB139Z"
-              :data-errors [{:key :data-line :pred "length-matches?"}]}]
+              :data-errors [{:in [:data-line] :pred 'pancake.fixed-width/length-matches?}]}]
             (pancake/parse format ["BBB139Z"])))))
