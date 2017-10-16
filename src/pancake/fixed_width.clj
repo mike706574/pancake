@@ -8,16 +8,16 @@
 (defn parse-line [format index line]
   (letfn [(assoc-field [record field]
             (let [{:keys [id start end]} field
-                  length (count line)]
-              (if (> end length)
+                  line-length (count line)]
+              (if (> end line-length)
                 (-> (assoc record id nil)
                     (data-error {:pred `contains? :in [id]}))
                 (assoc record id (subs line (dec start) end)))))]
-    (let [{:keys [fields length]} format
+    (let [{:keys [fields record-length]} format
           line-length (count line)
           record {:data-index index :data-line line}]
-      (if (and length (not= line-length length))
-        (data-error record {:pred `(length-matches? ~length)
+      (if (and record-length (not= line-length record-length))
+        (data-error record {:pred `(record-length-is? ~record-length)
                             :in [:data-line]
                             :val line})
         (reduce assoc-field record fields)))))

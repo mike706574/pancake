@@ -30,7 +30,7 @@
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
            (pancake/parse-str format "AAA015")))))
 
-(deftest no-specified-length
+(deftest no-specified-record-length
   (let [format {:id "test-format"
                 :type "fixed-width"
                 :description "Test format."
@@ -57,11 +57,11 @@
             {:data-index 1 :data-line "CCC264eklawejla" :id "CCC" :amount "264"}]
            (pancake/parse format ["BBB139" "CCC264eklawejla"])))))
 
-(deftest specified-length
+(deftest specified-record-length
   (let [format {:id "test-format"
                 :description "Test format."
                 :type "fixed-width"
-                :length 6
+                :record-length 6
                 :fields [{:id :id :start 1 :end 3}
                          {:id :amount :start 4 :end 6}]}]
     (is (= [{:data-index 0 :data-line "AAA015" :id "AAA" :amount "015"}]
@@ -70,6 +70,6 @@
     (is (=  [{:data-index 0
               :data-line "BBB139Z"
               :data-errors [{:in [:data-line]
-                             :pred '(pancake.fixed-width/length-matches? 6)
+                             :pred '(pancake.fixed-width/record-length-is? 6)
                              :val "BBB139Z"}]}]
             (pancake/parse format ["BBB139Z"])))))

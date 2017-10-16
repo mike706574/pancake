@@ -59,13 +59,13 @@
                 (-> record
                     (assoc id nil)
                     (data-error {:pred `contains? :in [id]})))))]
-    (let [{:keys [cells length delimiter]} format
+    (let [{:keys [cells cell-count delimiter]} format
           reader (PushbackReader. (StringReader. line))
           [valid? data] (read-record reader (char-int delimiter))
           record {:data-index index :data-line line}]
       (if valid?
-        (if (and length (not= (count data) length))
-          (data-error record {:pred `(length-matches? ~length)
+        (if (and cell-count (not= (count data) cell-count))
+          (data-error record {:pred `(cell-count-is? ~cell-count)
                               :in [:data-cell]
                               :val data})
           (reduce (partial assoc-cell data) record cells))

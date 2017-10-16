@@ -2,8 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]))
 
-(def reserved-ids #{:data-index :data-line :data-errors
-                    "data-index" "data-line" "data-errors"})
+(def reserved-ids #{:data-index :data-line :data-cell :data-errors
+                    "data-index" "data-line" "data-cell" "data-errors"})
 ;; predicates
 (defn unreserved? [id]
   (not (contains? reserved-ids id)))
@@ -27,7 +27,6 @@
 (s/def ::id (s/with-gen (s/and string? (complement str/blank?))
               #(s/gen #{"test"})))
 (s/def ::description string?)
-(s/def ::length integer?)
 (s/def ::type #{"fixed-width" "delimited"})
 
 (s/def ::generic-spec (s/or :qualified-keyword qualified-keyword?
@@ -39,8 +38,8 @@
         :string (s/and string? (complement str/blank?))))
 
 ;; fixed-width specs
+(s/def :pancake.fixed-width/record-length pos-int?)
 (s/def :pancake.fixed-width/id ::keyword-or-populated-string?)
-
 (s/def :pancake.fixed-width/start nat-int?)
 (s/def :pancake.fixed-width/end pos-int?)
 (s/def :pancake.fixed-width/spec ::generic-spec)
@@ -51,12 +50,11 @@
                       end-after-start?))
 (s/def :pancake.fixed-width/fields (s/+ :pancake.fixed-width/field))
 
-
 (s/def :pancake.fixed-width/format (s/and (s/keys :req-un [::id
                                                            ::description
                                                            ::type
                                                            :pancake.fixed-width/fields]
-                                                  :opt-un [::length ::spec])
+                                                  :opt-un [:pancake.fixed-width/record-length ::spec])
                                           fixed-width?
                                           valid-fixed-width-length?))
 
@@ -75,6 +73,7 @@
 (defn delimited? [format] (= (:type format) "delimited"))
 
 ;; delimited specs
+(s/def :pancake.delimited/cell-count pos-int?)
 (s/def :pancake.delimited/id ::keyword-or-populated-string?)
 (s/def :pancake.delimited/index (s/int-in 0 1000))
 (s/def :pancake.delimited/spec ::generic-spec)
@@ -90,7 +89,7 @@
                                                          ::type
                                                          :pancake.delimited/delimiter
                                                          :pancake.delimited/cells]
-                                                :opt-un [::length ::spec])
+                                                :opt-un [:pancake.delimited/cell-count ::spec])
                                         delimited?
                                         valid-delimited-length?))
 

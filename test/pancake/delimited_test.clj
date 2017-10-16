@@ -32,7 +32,7 @@
     (is (= [{:data-index 0 :data-line "AAA|015" :id "AAA" :amount "015"}]
            (pancake/parse-str format "AAA|015")))))
 
-(deftest no-specified-length
+(deftest no-specified-cell-count
   (let [format {:id "test-format"
                 :type "delimited"
                 :delimiter \|
@@ -60,21 +60,21 @@
             {:data-index 1 :data-line "CCC|264|eklawejla" :id "CCC" :amount "264"}]
            (pancake/parse format ["BBB|139" "CCC|264|eklawejla"])))))
 
-(deftest specified-length
+(deftest specified-cell-count
   (let [format {:id "test-format"
                 :description "Test format."
                 :type "delimited"
                 :delimiter "|"
-                :length 2
+                :cell-count 2
                 :cells [{:id :id :index 0}
-                         {:id :amount :index 1}]}]
+                        {:id :amount :index 1}]}]
     (is (= [{:data-index 0 :data-line "AAA|015" :id "AAA" :amount "015"}]
            (pancake/parse format ["AAA|015"])))
 
     (is (=  [{:data-index 0
               :data-line "BBB|139|Z"
               :data-errors [{:in [:data-cell]
-                             :pred `(pancake.delimited/length-matches? 2)
+                             :pred `(pancake.delimited/cell-count-is? 2)
                              :val ["BBB" "139" "Z"]}]}]
            (pancake/parse format ["BBB|139|Z"])))))
 
