@@ -1,4 +1,4 @@
-(defproject fun.mike/pancake "0.0.18"
+(defproject fun.mike/pancake "0.0.19-SNAPSHOT"
   :description "Flat file data parsing library."
   :url "https://github.com/mike706574/pancake"
   :license {:name "Eclipse Public License"
