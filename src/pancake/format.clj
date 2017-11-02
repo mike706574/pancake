@@ -29,8 +29,7 @@
 (s/def ::description string?)
 (s/def ::type #{"fixed-width" "delimited"})
 
-(s/def ::generic-spec (s/or :qualified-keyword qualified-keyword?
-                            :function fn?))
+(s/def ::generic-spec any?)
 (s/def ::spec ::generic-spec)
 
 (s/def ::keyword-or-populated-string?
